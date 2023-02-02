@@ -26,12 +26,16 @@ void processInput(GLFWwindow *window);
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
-// treba za teksture
-unsigned int loadTexture(char const *path);
+unsigned int loadTexture(char const * path);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+
+//lighting
+bool blinn = false;
+bool blinnKeyPressed = false;
+
 
 // camera
 
@@ -59,7 +63,7 @@ struct ProgramState {
     bool ImGuiEnabled = false;
     Camera camera;
     bool CameraMouseMovementUpdateEnabled = true;
-    glm::vec3 backpackPosition = glm::vec3(0.5f);
+    glm::vec3 backpackPosition = glm::vec3(0.0f);
     float backpackScale = 1.0f;
     PointLight pointLight;
     ProgramState()
@@ -100,13 +104,9 @@ void ProgramState::LoadFromFile(std::string filename) {
     }
 }
 
-
 ProgramState *programState;
 
 void DrawImGui(ProgramState *programState);
-
-bool blinn = false;
-bool blinnKeyPressed = false;
 
 int main() {
     // glfw: initialize and configure
@@ -122,7 +122,7 @@ int main() {
 
     // glfw window creation
     // --------------------
-    GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Project", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -168,23 +168,16 @@ int main() {
 
     // build and compile shaders
     // -------------------------
-    // ----- shaderi -----
     Shader ourShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
     Shader podShader("resources/shaders/pod.vs", "resources/shaders/pod.fs");
-
     // load models
     // -----------
-    // ----- modeli -----
     Model ourModel("resources/objects/backpack/backpack.obj");
-    Model chairModel("resources/objects/computer/Notebook.obj");
-
-//    ourModel.SetShaderTextureNamePrefix("material.");
-//    chairModel.SetShaderTextureNamePrefix("material.");
-
+    ourModel.SetShaderTextureNamePrefix("material.");
 
     PointLight& pointLight = programState->pointLight;
     pointLight.position = glm::vec3(4.0f, 4.0, 0.0);
-    pointLight.ambient = glm::vec3(0.3, 0.3, 0.3);
+    pointLight.ambient = glm::vec3(0.1, 0.1, 0.1);
     pointLight.diffuse = glm::vec3(0.6, 0.6, 0.6);
     pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
 
@@ -193,19 +186,18 @@ int main() {
     pointLight.quadratic = 0.032f;
 
 
-    // ----- POD -----
+
     float planeVertices[] = {
             // positions            // normals         // texcoords
-            1000.0f, -0.5f,  1000.0f,  0.0f, 1.0f, 0.0f,  10.0f,  0.0f,
-            -1000.0f, -0.5f,  1000.0f,  0.0f, 1.0f, 0.0f,   0.0f,  0.0f,
-            -1000.0f, -0.5f, -1000.0f,  0.0f, 1.0f, 0.0f,   0.0f, 10.0f,
+            10.0f, -0.5f,  10.0f,  0.0f, 1.0f, 0.0f,  10.0f,  0.0f,
+            -10.0f, -0.5f,  10.0f,  0.0f, 1.0f, 0.0f,   0.0f,  0.0f,
+            -10.0f, -0.5f, -10.0f,  0.0f, 1.0f, 0.0f,   0.0f, 10.0f,
 
-            1000.0f, -0.5f,  1000.0f,  0.0f, 1.0f, 0.0f,  10.0f,  0.0f,
-            -1000.0f, -0.5f, -1000.0f,  0.0f, 1.0f, 0.0f,   0.0f, 10.0f,
-            1000.0f, -0.5f, -1000.0f,  0.0f, 1.0f, 0.0f,  10.0f, 10.0f
+            10.0f, -0.5f,  10.0f,  0.0f, 1.0f, 0.0f,  10.0f,  0.0f,
+            -10.0f, -0.5f, -10.0f,  0.0f, 1.0f, 0.0f,   0.0f, 10.0f,
+            10.0f, -0.5f, -10.0f,  0.0f, 1.0f, 0.0f,  10.0f, 10.0f
     };
-
-    //aktiviranje i linkovanje VAO i VBO za crtanje poda
+    // plane VAO
     unsigned int planeVAO, planeVBO;
     glGenVertexArrays(1, &planeVAO);
     glGenBuffers(1, &planeVBO);
@@ -220,13 +212,15 @@ int main() {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glBindVertexArray(0);
 
-    //tekstura
+    // load textures
+    // -------------
     unsigned int floorTexture = loadTexture(FileSystem::getPath("resources/textures/wood.png").c_str());
     podShader.use();
     podShader.setInt("texture1", 0);
 
+
     // draw in wireframe
-//    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // render loop
     // -----------
@@ -243,35 +237,36 @@ int main() {
 
 
         // render
-        glm::mat4 model = glm::mat4(1.0f);
         // ------
-        glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+        glClearColor(programState->clearColor.r, programState->clearColor.g, programState->clearColor.b, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //----- POD -----
+        //osvetljenje za pod
+//        glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
+//        podShader.setVec3("viewPos", programState->camera.Position);
+//        podShader.setVec3("lightPos", lightPos);
+//        podShader.setInt("blinn", blinn);
+
+        //pod
         glBindVertexArray(planeVAO);
         glActiveTexture(GL_TEXTURE0);
-        model = glm::mat4(1.0f);
         glBindTexture(GL_TEXTURE_2D, floorTexture);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
+//        std::cout << (blinn ? "Blinn-Phong" : "Phong") << std::endl;
 
         // don't forget to enable shader before setting uniforms
         ourShader.use();
-        pointLight.position = glm::vec3(4.0 , 4.0f, 4.0);
-//        ourShader.setVec3("pointLight.position", pointLight.position);
-//        ourShader.setVec3("pointLight.ambient", pointLight.ambient);
-//        ourShader.setVec3("pointLight.diffuse", pointLight.diffuse);
-//        ourShader.setVec3("pointLight.specular", pointLight.specular);
-//        ourShader.setFloat("pointLight.constant", pointLight.constant);
-//        ourShader.setFloat("pointLight.linear", pointLight.linear);
-//        ourShader.setFloat("pointLight.quadratic", pointLight.quadratic);
-//        ourShader.setVec3("viewPosition", programState->camera.Position);
-//        ourShader.setFloat("material.shininess", 32.0f);
-
-        ourShader.setVec3("viewPos", programState->camera.Position);
-        ourShader.setVec3("lightPos", pointLight.position);
-        ourShader.setInt("blinn", blinn);
+        pointLight.position = glm::vec3(4.0 * cos(glfwGetTime()) , 4.0f, 4.0*sin(glfwGetTime()));
+        ourShader.setVec3("pointLight.position", pointLight.position);
+        ourShader.setVec3("pointLight.ambient", pointLight.ambient);
+        ourShader.setVec3("pointLight.diffuse", pointLight.diffuse);
+        ourShader.setVec3("pointLight.specular", pointLight.specular);
+        ourShader.setFloat("pointLight.constant", pointLight.constant);
+        ourShader.setFloat("pointLight.linear", pointLight.linear);
+        ourShader.setFloat("pointLight.quadratic", pointLight.quadratic);
+        ourShader.setVec3("viewPosition", programState->camera.Position);
+        ourShader.setFloat("material.shininess", 32.0f);
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(programState->camera.Zoom),
                                                 (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
@@ -280,26 +275,16 @@ int main() {
         ourShader.setMat4("view", view);
 
         // render the loaded model
-
-//        model = glm::translate(model,
-//                               programState->backpackPosition); // translate it down, so it's at the center of the scene
-//        model = glm::scale(model, glm::vec3(programState->backpackScale));    // it's a bit too big for our scene, so scale it down
-//        ourShader.setMat4("model", model);
-//        ourModel.Draw(ourShader);
-
-        //chair
+        glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model,
                                programState->backpackPosition); // translate it down, so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(programState->backpackScale*0.01));    // it's a bit too big for our scene, so scale it down
+        model = glm::scale(model, glm::vec3(programState->backpackScale));    // it's a bit too big for our scene, so scale it down
         ourShader.setMat4("model", model);
-        chairModel.Draw(ourShader);
-
-
-
-
+        ourModel.Draw(ourShader);
 
         if (programState->ImGuiEnabled)
             DrawImGui(programState);
+
 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -334,6 +319,7 @@ void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         programState->camera.ProcessKeyboard(RIGHT, deltaTime);
 
+    //needef for lighting "adjustments"
     if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS && !blinnKeyPressed)
     {
         blinn = !blinn;
@@ -424,8 +410,8 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         }
     }
 }
-
-unsigned int loadTexture(char const *path)
+//needed for textures
+unsigned int loadTexture(char const * path)
 {
     unsigned int textureID;
     glGenTextures(1, &textureID);
@@ -446,8 +432,8 @@ unsigned int loadTexture(char const *path)
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT); // for this tutorial: use GL_CLAMP_TO_EDGE to prevent semi-transparent borders. Due to interpolation it takes texels from next repeat
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
