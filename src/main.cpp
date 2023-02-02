@@ -176,7 +176,7 @@ int main() {
 
     PointLight& pointLight = programState->pointLight;
     pointLight.position = glm::vec3(4.0f, 4.0, 0.0);
-    pointLight.ambient = glm::vec3(0.1, 0.1, 0.1);
+    pointLight.ambient = glm::vec3(0.3, 0.3, 0.3);
     pointLight.diffuse = glm::vec3(0.6, 0.6, 0.6);
     pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
 
@@ -211,7 +211,7 @@ int main() {
     glBindVertexArray(0);
 
     //tekstura
-    unsigned int floorTexture = loadTexture(FileSystem::getPath("resources/textures/awesomeface.png").c_str());
+    unsigned int floorTexture = loadTexture(FileSystem::getPath("resources/textures/container.jpg").c_str());
 
     //
     podShader.use();
