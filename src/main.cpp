@@ -100,9 +100,13 @@ void ProgramState::LoadFromFile(std::string filename) {
     }
 }
 
+
 ProgramState *programState;
 
 void DrawImGui(ProgramState *programState);
+
+bool blinn = false;
+bool blinnKeyPressed = false;
 
 int main() {
     // glfw: initialize and configure
@@ -254,16 +258,20 @@ int main() {
 
         // don't forget to enable shader before setting uniforms
         ourShader.use();
-        pointLight.position = glm::vec3(4.0 * cos(currentFrame), 4.0f, 4.0 * sin(currentFrame));
-        ourShader.setVec3("pointLight.position", pointLight.position);
-        ourShader.setVec3("pointLight.ambient", pointLight.ambient);
-        ourShader.setVec3("pointLight.diffuse", pointLight.diffuse);
-        ourShader.setVec3("pointLight.specular", pointLight.specular);
-        ourShader.setFloat("pointLight.constant", pointLight.constant);
-        ourShader.setFloat("pointLight.linear", pointLight.linear);
-        ourShader.setFloat("pointLight.quadratic", pointLight.quadratic);
-        ourShader.setVec3("viewPosition", programState->camera.Position);
-        ourShader.setFloat("material.shininess", 32.0f);
+        pointLight.position = glm::vec3(4.0 , 4.0f, 4.0);
+//        ourShader.setVec3("pointLight.position", pointLight.position);
+//        ourShader.setVec3("pointLight.ambient", pointLight.ambient);
+//        ourShader.setVec3("pointLight.diffuse", pointLight.diffuse);
+//        ourShader.setVec3("pointLight.specular", pointLight.specular);
+//        ourShader.setFloat("pointLight.constant", pointLight.constant);
+//        ourShader.setFloat("pointLight.linear", pointLight.linear);
+//        ourShader.setFloat("pointLight.quadratic", pointLight.quadratic);
+//        ourShader.setVec3("viewPosition", programState->camera.Position);
+//        ourShader.setFloat("material.shininess", 32.0f);
+
+        ourShader.setVec3("viewPos", programState->camera.Position);
+        ourShader.setVec3("lightPos", pointLight.position);
+        ourShader.setInt("blinn", blinn);
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(programState->camera.Zoom),
                                                 (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
@@ -325,6 +333,16 @@ void processInput(GLFWwindow *window) {
         programState->camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         programState->camera.ProcessKeyboard(RIGHT, deltaTime);
+
+    if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS && !blinnKeyPressed)
+    {
+        blinn = !blinn;
+        blinnKeyPressed = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE)
+    {
+        blinnKeyPressed = false;
+    }
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
