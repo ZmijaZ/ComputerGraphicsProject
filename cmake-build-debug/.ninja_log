@@ -1,0 +1,24 @@
+# ninja log v5
+3	810	1675326288668077703	libs/glad/CMakeFiles/glad.dir/src/glad.c.o	675ce692e2aa38b5
+810	1067	1675326288888099241	libs/glad/libglad.a	23609bf8315ad0c1
+1067	1790	1675326289648173635	libs/imgui/CMakeFiles/imgui.dir/src/imgui_impl_glfw.cpp.o	902c510bf923bb5d
+1790	2596	1675326290456252726	libs/imgui/CMakeFiles/imgui.dir/src/imgui_impl_opengl3.cpp.o	fb527139c6d1eb6a
+2596	10985	1675326298841073003	libs/imgui/CMakeFiles/imgui.dir/src/imgui_tables.cpp.o	5c01214b368a98d2
+3	11306	1675326299165104709	libs/imgui/CMakeFiles/imgui.dir/src/imgui_demo.cpp.o	7ad19c974d36cfa1
+2	15063	1675326302889468897	CMakeFiles/project_base.dir/src/main.cpp.o	892a05d68134a399
+1	15204	1675326303057485322	CMakeFiles/STB_IMAGE.dir/libs/stb_image.cpp.o	61ece753ffaa30ac
+15204	15243	1675326303105490014	libSTB_IMAGE.a	920cd876f67b5b33
+5	16504	1675326304357612417	libs/imgui/CMakeFiles/imgui.dir/src/imgui_draw.cpp.o	47a849cc2df4d23e
+4	20498	1675326306869857964	libs/imgui/CMakeFiles/imgui.dir/src/imgui.cpp.o	cedc00cc0f38e9ec
+10992	29698	1675326317550901369	libs/imgui/CMakeFiles/imgui.dir/src/imgui_widgets.cpp.o	dd2f18ccc3e2e2e6
+29698	30376	1675326318150959960	libs/imgui/libimgui.a	6ed2d7b75fbe80d2
+30376	30847	1675326318707014249	/home/dzzz/kofultet/grafika/ComputerGraphicsProject/project_base	93392a873d8f8365
+2	4808	1675326770151916821	CMakeFiles/project_base.dir/src/main.cpp.o	892a05d68134a399
+2	4340	1675326809069751218	CMakeFiles/project_base.dir/src/main.cpp.o	892a05d68134a399
+4341	4537	1675326809269780824	/home/dzzz/kofultet/grafika/ComputerGraphicsProject/project_base	93392a873d8f8365
+2	4389	1675326885712836892	CMakeFiles/project_base.dir/src/main.cpp.o	892a05d68134a399
+4389	4610	1675326885936868574	/home/dzzz/kofultet/grafika/ComputerGraphicsProject/project_base	93392a873d8f8365
+2	4533	1675326945333129442	CMakeFiles/project_base.dir/src/main.cpp.o	892a05d68134a399
+4533	4743	1675326945545158460	/home/dzzz/kofultet/grafika/ComputerGraphicsProject/project_base	93392a873d8f8365
+3	4468	1675326987614854211	CMakeFiles/project_base.dir/src/main.cpp.o	892a05d68134a399
+4468	4669	1675326987814881009	/home/dzzz/kofultet/grafika/ComputerGraphicsProject/project_base	93392a873d8f8365
