@@ -172,7 +172,11 @@ int main() {
     // -----------
     // ----- modeli -----
     Model ourModel("resources/objects/backpack/backpack.obj");
-    ourModel.SetShaderTextureNamePrefix("material.");
+    Model chairModel("resources/objects/computer/Notebook.obj");
+
+//    ourModel.SetShaderTextureNamePrefix("material.");
+//    chairModel.SetShaderTextureNamePrefix("material.");
+
 
     PointLight& pointLight = programState->pointLight;
     pointLight.position = glm::vec3(4.0f, 4.0, 0.0);
@@ -187,14 +191,14 @@ int main() {
 
     // ----- POD -----
     float planeVertices[] = {
-            // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
-            5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
-            -5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
-            -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+            // positions            // normals         // texcoords
+            1000.0f, -0.5f,  1000.0f,  0.0f, 1.0f, 0.0f,  10.0f,  0.0f,
+            -1000.0f, -0.5f,  1000.0f,  0.0f, 1.0f, 0.0f,   0.0f,  0.0f,
+            -1000.0f, -0.5f, -1000.0f,  0.0f, 1.0f, 0.0f,   0.0f, 10.0f,
 
-            5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
-            -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
-            5.0f, -0.5f, -5.0f,  2.0f, 2.0f
+            1000.0f, -0.5f,  1000.0f,  0.0f, 1.0f, 0.0f,  10.0f,  0.0f,
+            -1000.0f, -0.5f, -1000.0f,  0.0f, 1.0f, 0.0f,   0.0f, 10.0f,
+            1000.0f, -0.5f, -1000.0f,  0.0f, 1.0f, 0.0f,  10.0f, 10.0f
     };
 
     //aktiviranje i linkovanje VAO i VBO za crtanje poda
@@ -203,22 +207,22 @@ int main() {
     glGenBuffers(1, &planeVBO);
     glBindVertexArray(planeVAO);
     glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glBindVertexArray(0);
 
     //tekstura
-    unsigned int floorTexture = loadTexture(FileSystem::getPath("resources/textures/container.jpg").c_str());
-
-    //
+    unsigned int floorTexture = loadTexture(FileSystem::getPath("resources/textures/wood.png").c_str());
     podShader.use();
     podShader.setInt("texture1", 0);
 
     // draw in wireframe
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+//    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // render loop
     // -----------
@@ -235,9 +239,18 @@ int main() {
 
 
         // render
+        glm::mat4 model = glm::mat4(1.0f);
         // ------
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        //----- POD -----
+        glBindVertexArray(planeVAO);
+        glActiveTexture(GL_TEXTURE0);
+        model = glm::mat4(1.0f);
+        glBindTexture(GL_TEXTURE_2D, floorTexture);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
 
         // don't forget to enable shader before setting uniforms
         ourShader.use();
@@ -259,20 +272,22 @@ int main() {
         ourShader.setMat4("view", view);
 
         // render the loaded model
-        glm::mat4 model = glm::mat4(1.0f);
+
+//        model = glm::translate(model,
+//                               programState->backpackPosition); // translate it down, so it's at the center of the scene
+//        model = glm::scale(model, glm::vec3(programState->backpackScale));    // it's a bit too big for our scene, so scale it down
+//        ourShader.setMat4("model", model);
+//        ourModel.Draw(ourShader);
+
+        //chair
         model = glm::translate(model,
                                programState->backpackPosition); // translate it down, so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(programState->backpackScale));    // it's a bit too big for our scene, so scale it down
+        model = glm::scale(model, glm::vec3(programState->backpackScale*0.01));    // it's a bit too big for our scene, so scale it down
         ourShader.setMat4("model", model);
-        ourModel.Draw(ourShader);
+        chairModel.Draw(ourShader);
 
 
-        //----- POD -----
-        glBindVertexArray(planeVAO);
-        glBindTexture(GL_TEXTURE_2D, floorTexture);
-        podShader.setMat4("model", glm::mat4(1.0f));
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
+
 
 
         if (programState->ImGuiEnabled)
