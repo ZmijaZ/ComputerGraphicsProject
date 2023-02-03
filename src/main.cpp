@@ -168,7 +168,7 @@ int main() {
 
     //culling
     glEnable(GL_CULL_FACE);
-    glCullFace(GL_FRONT);
+    glCullFace(GL_BACK);
 
     // build and compile shaders
     // -------------------------
@@ -250,7 +250,9 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //osvetljenje za pod
+
         podShader.use();
+
         glm::mat4 projection = glm::perspective(glm::radians(programState->camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = programState->camera.GetViewMatrix();
         podShader.setMat4("projection", projection);
@@ -260,11 +262,14 @@ int main() {
         podShader.setVec3("lightPos", lightPos);
         podShader.setInt("blinn", blinn);
 
+
         //pod
+        glDisable(GL_CULL_FACE);
         glBindVertexArray(planeVAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, floorTexture);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+        glEnable(GL_CULL_FACE);
 
 //        std::cout << (blinn ? "Blinn-Phong" : "Phong") << std::endl;
 
