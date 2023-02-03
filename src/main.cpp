@@ -174,10 +174,14 @@ int main() {
     // -------------------------
     Shader ourShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
     Shader podShader("resources/shaders/pod.vs", "resources/shaders/pod.fs");
-    Shader kockaShader("resources/shaders/kocka.vs", "resources/shaders/kocka.fs");
+//    Shader kockaShader("resources/shaders/kocka.vs", "resources/shaders/kocka.fs");
+
     // load models
     // -----------
     Model ourModel("resources/objects/backpack/backpack.obj");
+    Model deskModel("resources/objects/desk/desk.obj");
+    Model chairModel("resources/objects/chair/chair.obj");
+    Model computerModel("resources/objects/computer/Notebook.obj");
     ourModel.SetShaderTextureNamePrefix("material.");
 
     PointLight& pointLight = programState->pointLight;
@@ -294,12 +298,35 @@ int main() {
 
         // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
+//        model = glm::translate(model,
+//                               programState->backpackPosition); // translate it down, so it's at the center of the scene
+//        model = glm::scale(model, glm::vec3(programState->backpackScale));    // it's a bit too big for our scene, so scale it down
+//        ourShader.setMat4("model", model);
+//        ourModel.Draw(ourShader);
+
+            //chair
+        model = glm::translate(model,
+                               programState->backpackPosition+1.0f); // translate it down, so it's at the center of the scene
+        model = glm::scale(model, glm::vec3(programState->backpackScale*0.01));    // it's a bit too big for our scene, so scale it down
+        ourShader.setMat4("model", model);
+        chairModel.Draw(ourShader);
+
+            //table
         model = glm::translate(model,
                                programState->backpackPosition+2.0f); // translate it down, so it's at the center of the scene
         model = glm::scale(model, glm::vec3(programState->backpackScale));    // it's a bit too big for our scene, so scale it down
         ourShader.setMat4("model", model);
-        ourModel.Draw(ourShader);
+        deskModel.Draw(ourShader);
 
+            //laptop
+        model = glm::translate(model,
+                               programState->backpackPosition+4.0f); // translate it down, so it's at the center of the scene
+        model = glm::scale(model, glm::vec3(programState->backpackScale*0.1));    // it's a bit too big for our scene, so scale it down
+        ourShader.setMat4("model", model);
+        computerModel.Draw(ourShader);
+
+
+        //imgui
         if (programState->ImGuiEnabled)
             DrawImGui(programState);
 
