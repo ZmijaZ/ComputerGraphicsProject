@@ -166,10 +166,15 @@ int main() {
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
 
+    //culling
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+
     // build and compile shaders
     // -------------------------
     Shader ourShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
     Shader podShader("resources/shaders/pod.vs", "resources/shaders/pod.fs");
+    Shader kockaShader("resources/shaders/kocka.vs", "resources/shaders/kocka.fs");
     // load models
     // -----------
     Model ourModel("resources/objects/backpack/backpack.obj");
@@ -212,9 +217,12 @@ int main() {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glBindVertexArray(0);
 
+
+
     // load textures
     // -------------
     unsigned int floorTexture = loadTexture(FileSystem::getPath("resources/textures/wood.png").c_str());
+
     podShader.use();
     podShader.setInt("texture1", 0);
 
@@ -242,10 +250,15 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //osvetljenje za pod
-//        glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
-//        podShader.setVec3("viewPos", programState->camera.Position);
-//        podShader.setVec3("lightPos", lightPos);
-//        podShader.setInt("blinn", blinn);
+        podShader.use();
+        glm::mat4 projection = glm::perspective(glm::radians(programState->camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view = programState->camera.GetViewMatrix();
+        podShader.setMat4("projection", projection);
+        podShader.setMat4("view", view);
+        glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
+        podShader.setVec3("viewPos", glm::vec3(4.0 * cos(glfwGetTime()) , 4.0f, 4.0*sin(glfwGetTime())));
+        podShader.setVec3("lightPos", lightPos);
+        podShader.setInt("blinn", blinn);
 
         //pod
         glBindVertexArray(planeVAO);
@@ -267,17 +280,17 @@ int main() {
         ourShader.setFloat("pointLight.quadratic", pointLight.quadratic);
         ourShader.setVec3("viewPosition", programState->camera.Position);
         ourShader.setFloat("material.shininess", 32.0f);
-        // view/projection transformations
-        glm::mat4 projection = glm::perspective(glm::radians(programState->camera.Zoom),
+//         view/projection transformations
+        projection = glm::perspective(glm::radians(programState->camera.Zoom),
                                                 (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
-        glm::mat4 view = programState->camera.GetViewMatrix();
+        view = programState->camera.GetViewMatrix();
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", view);
 
         // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model,
-                               programState->backpackPosition); // translate it down, so it's at the center of the scene
+                               programState->backpackPosition+2.0f); // translate it down, so it's at the center of the scene
         model = glm::scale(model, glm::vec3(programState->backpackScale));    // it's a bit too big for our scene, so scale it down
         ourShader.setMat4("model", model);
         ourModel.Draw(ourShader);
