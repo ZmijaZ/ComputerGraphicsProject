@@ -36,6 +36,8 @@ const unsigned int SCR_HEIGHT = 600;
 bool blinn = false;
 bool blinnKeyPressed = false;
 
+int colorScheme = 0;
+
 
 // camera
 
@@ -396,6 +398,7 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         screenShader.use();
+        screenShader.setInt("colorScheme", colorScheme);
         glBindVertexArray(quadVAO);
         glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -439,18 +442,35 @@ void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
         programState->camera.ProcessKeyboard(DOWNWARD, deltaTime);
 
-    //needef for lighting "adjustments"
+    //needed for lighting "adjustments"
     if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS && !blinnKeyPressed)
     {
         blinn = !blinn;
         blinnKeyPressed = true;
-        std::cout << (blinn ? "Blinn-Phong" : "Phong") << std::endl;
+//        std::cout << (blinn ? "Blinn-Phong" : "Phong") << std::endl;
     }
     if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE)
     {
         blinnKeyPressed = false;
-        std::cout << (blinn ? "Blinn-Phong" : "Phong") << std::endl;
+//        std::cout << (blinn ? "Blinn-Phong" : "Phong") << std::endl;
     }
+
+    //needed for colorScheme adjustments
+    if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && colorScheme == 0){
+        colorScheme = 1;
+        std::cout << colorScheme << '\n';
+    }
+    else if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && colorScheme == 1){
+        colorScheme = 2;
+        std::cout << colorScheme << '\n';
+    }
+    else if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && colorScheme == 2){
+        colorScheme = 0;
+        std::cout << colorScheme << '\n';
+    }
+
+
+
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
