@@ -75,6 +75,7 @@ struct ProgramState {
     ProgramState()
             : camera(glm::vec3(0.0f, 0.0f, 3.0f)) {}
 
+
     void SaveToFile(std::string filename);
 
     void LoadFromFile(std::string filename);
@@ -326,9 +327,9 @@ int main() {
         podShader.setMat4("view", view);
 
         //osvetljenje za pod
-        glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
-        podShader.setVec3("viewPos", glm::vec3(4.0 * cos(glfwGetTime()) , 4.0f, 4.0*sin(glfwGetTime())));
-        podShader.setVec3("lightPos", lightPos);
+        pointLight.position = glm::vec3(4.0 * cos(glfwGetTime()) , 4.0f, 4.0*sin(glfwGetTime()));
+        podShader.setVec3("viewPos", programState->camera.Position);
+        podShader.setVec3("lightPos", pointLight.position);
         podShader.setInt("blinn", blinn);
 
         //crtanje poda
@@ -342,7 +343,7 @@ int main() {
         // osvetljenje modela
         // don't forget to enable shader before setting uniforms
         ourShader.use();
-        pointLight.position = glm::vec3(4.0 * cos(glfwGetTime()) , 4.0f, 4.0*sin(glfwGetTime()));
+//        pointLight.position = glm::vec3(4.0 * cos(glfwGetTime()) , 4.0f, 4.0*sin(glfwGetTime()));
         ourShader.setVec3("pointLight.position", pointLight.position);
         ourShader.setVec3("pointLight.ambient", pointLight.ambient);
         ourShader.setVec3("pointLight.diffuse", pointLight.diffuse);
@@ -369,22 +370,23 @@ int main() {
 
             //chair
         model = glm::translate(model,
-                               programState->backpackPosition+1.0f); // translate it down, so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(programState->backpackScale*0.01));    // it's a bit too big for our scene, so scale it down
+                               programState->backpackPosition+glm::vec3(1.0f, -0.5f, 1.0f)); // translate it down, so it's at the center of the scene
+        model = glm::scale(model, glm::vec3(programState->backpackScale*0.08));    // it's a bit too big for our scene, so scale it down
         ourShader.setMat4("model", model);
-        chairModel.Draw(ourShader);
+        chairModel.Draw(podShader);
 
             //table
         model = glm::translate(model,
-                               programState->backpackPosition+2.0f); // translate it down, so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(programState->backpackScale));    // it's a bit too big for our scene, so scale it down
+                               programState->backpackPosition+glm::vec3(2.0f, 0.0f, 2.0f)); // translate it down, so it's at the center of the scene
+        model = glm::scale(model, glm::vec3(programState->backpackScale*6.0));    // it's a bit too big for our scene, so scale it down
         ourShader.setMat4("model", model);
         deskModel.Draw(ourShader);
 
             //laptop
         model = glm::translate(model,
-                               programState->backpackPosition+4.0f); // translate it down, so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(programState->backpackScale*0.1));    // it's a bit too big for our scene, so scale it down
+                               glm::vec3(2.0f, 4.0f, 0.0f)); // translate it down, so it's at the center of the scene
+        model = glm::scale(model, glm::vec3(programState->backpackScale*0.07));    // it's a bit too big for our scene, so scale it down
+        model = glm::rotate(model, glm::radians(-120.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         ourShader.setMat4("model", model);
         computerModel.Draw(ourShader);
 
