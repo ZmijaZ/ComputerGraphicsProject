@@ -434,17 +434,6 @@ int main() {
         glEnable(GL_CULL_FACE);
 
 
-        //cube
-//        cubeShader.use();
-//        cubeShader.setMat4("projection", projection);
-//        cubeShader.setMat4("view", view);
-//
-//        cubeShader.setVec3("viewPos", programState->camera.Position);
-//        cubeShader.setVec3("lightPos", pointLight.position);
-//        cubeShader.setInt("blinn", blinn);
-//        cubeShader.setVec3("pointLight.specular", glm::vec3(0.0f, 0.0f, 0.0f));//non shining not working?
-//        cubeShader.setFloat("material.shininess", 32.0f);
-
 
         cubeShader.use();
         view = programState->camera.GetViewMatrix();
@@ -458,7 +447,8 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, cubeTexture);
         glm::mat4 model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
         model = glm::scale(model, glm::vec3(10.f));
-        model = glm::translate(model, glm::vec3(0.0f, -5.0f, 7.0f));
+        model = glm::translate(model, glm::vec3(-3.0f, 0.58f, 3.0f));
+
         cubeShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glEnable(GL_CULL_FACE);
@@ -561,14 +551,11 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
 
-
-
         screenShader.setInt("hdr", hdr);
         screenShader.setFloat("exposure", exposure);
         screenShader.use();
         screenShader.setInt("colorScheme", colorScheme);
         renderQuad();
-
 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
