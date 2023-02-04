@@ -114,6 +114,9 @@ ProgramState *programState;
 
 void DrawImGui(ProgramState *programState);
 
+
+void renderQuad();
+
 int main() {
     // glfw: initialize and configure
     // ------------------------------
@@ -205,13 +208,13 @@ int main() {
 
     float carpetVertices[] = {
             // positions            // normals         // texcoords
-            5.0f, -0.48f,  5.0f,  0.0f, 1.0f, 0.0f,  2.0f,  0.0f,
-            -5.0f, -0.48f,  5.0f,  0.0f, 1.0f, 0.0f,   0.0f,  0.0f,
-            -5.0f, -0.48f, -5.0f,  0.0f, 1.0f, 0.0f,   0.0f, 2.0f,
+            4.0f, -0.48f,  5.0f,  0.0f, 1.0f, 0.0f,  2.0f,  0.0f,
+            -4.0f, -0.48f,  5.0f,  0.0f, 1.0f, 0.0f,   0.0f,  0.0f,
+            -4.0f, -0.48f, -5.0f,  0.0f, 1.0f, 0.0f,   0.0f, 2.0f,
 
-            5.0f, -0.48f,  5.0f,  0.0f, 1.0f, 0.0f,  2.0f,  0.0f,
-            -5.0f, -0.48f, -5.0f,  0.0f, 1.0f, 0.0f,   0.0f, 2.0f,
-            5.0f, -0.48f, -5.0f,  0.0f, 1.0f, 0.0f,  2.0f, 2.0f
+            4.0f, -0.48f,  5.0f,  0.0f, 1.0f, 0.0f,  2.0f,  0.0f,
+            -4.0f, -0.48f, -5.0f,  0.0f, 1.0f, 0.0f,   0.0f, 2.0f,
+            4.0f, -0.48f, -5.0f,  0.0f, 1.0f, 0.0f,  2.0f, 2.0f
     };
     // carpet VAO
     unsigned int carpetVAO, carpetVBO;
@@ -257,26 +260,7 @@ int main() {
 
 
 
-    float quadVertices[] = {
-            -1.0f,  1.0f,  0.0f, 1.0f,
-            -1.0f, -1.0f,  0.0f, 0.0f,
-            1.0f, -1.0f,  1.0f, 0.0f,
 
-            -1.0f,  1.0f,  0.0f, 1.0f,
-            1.0f, -1.0f,  1.0f, 0.0f,
-            1.0f,  1.0f,  1.0f, 1.0f
-    };
-
-    unsigned int quadVAO, quadVBO;
-    glGenVertexArrays(1, &quadVAO);
-    glGenBuffers(1, &quadVBO);
-    glBindVertexArray(quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
 
     //teksture i to
@@ -374,6 +358,7 @@ int main() {
         carpetShader.setVec3("viewPos", programState->camera.Position);
         carpetShader.setVec3("lightPos", pointLight.position);
         carpetShader.setInt("blinn", blinn);
+        carpetShader.setVec3("pointLight.specular", glm::vec3(0.0f, 0.0f, 0.0f));//non shining not working?
         carpetShader.setFloat("material.shininess", 6144.0f);
 
         glDisable(GL_CULL_FACE);
@@ -458,14 +443,9 @@ int main() {
 
         screenShader.setInt("hdr", hdr);
         screenShader.setFloat("exposure", exposure);
-
-
-
         screenShader.use();
         screenShader.setInt("colorScheme", colorScheme);
-        glBindVertexArray(quadVAO);
-        glBindTexture(GL_TEXTURE_2D, textureColorBuffer);	// use the color attachment texture as the texture of the quad plane
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        renderQuad();
 
 
 
@@ -643,6 +623,7 @@ unsigned int loadTexture(char const * path, bool gammaCorrection)
     glGenTextures(1, &textureID);
 
     int width, height, nrComponents;
+    stbi_set_flip_vertically_on_load(true);
     unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
     if (data)
     {
@@ -681,4 +662,33 @@ unsigned int loadTexture(char const * path, bool gammaCorrection)
     }
 
     return textureID;
+}
+
+unsigned int quadVAO = 0;
+unsigned int quadVBO;
+void renderQuad()
+{
+    if (quadVAO == 0)
+    {
+        float quadVertices[] = {
+                // positions        // texture Coords
+                -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+                1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+                1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        };
+        // setup plane VAO
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    }
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
 }

@@ -9,7 +9,9 @@ in VS_OUT {
 
 struct Material {
     sampler2D floorTexture;
+    sampler2D floorTexture_specular;
     float shininess;
+
 };
 
 // uniform sampler2D floorTexture;
@@ -43,6 +45,8 @@ void main()
         vec3 reflectDir = reflect(-lightDir, normal);
         spec = pow(max(dot(viewDir, reflectDir), 0.0), 8.0);
     }
-    vec3 specular = vec3(0.3) * spec; // assuming bright white light color
+
+//     vec3 specular = light.specular * spec * vec3(texture(material.texture_specular1, TexCoords).xxx);
+    vec3 specular = vec3(texture(material.floorTexture_specular, fs_in.TexCoords).xxx) * spec; // assuming bright white light color
     FragColor = vec4(ambient + diffuse + specular, 1.0);
 }
