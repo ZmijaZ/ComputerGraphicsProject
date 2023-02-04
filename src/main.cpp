@@ -33,7 +33,7 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 //lighting
-bool blinn = false;
+bool blinn = true;
 bool blinnKeyPressed = false;
 
 int colorScheme = 0;
@@ -44,7 +44,6 @@ float exposure = 1.0f;
 
 
 // camera
-
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -182,6 +181,7 @@ int main() {
     Shader ourShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
     Shader podShader("resources/shaders/pod.vs", "resources/shaders/pod.fs");
     Shader screenShader( "resources/shaders/screen.vs", "resources/shaders/screen.fs");
+    Shader carpetShader("resources/shaders/carpet.vs", "resources/shaders/carpet.fs");
 
 //    Shader kockaShader("resources/shaders/kocka.vs", "resources/shaders/kocka.fs");
 
@@ -202,6 +202,31 @@ int main() {
     pointLight.constant = 1.0f;
     pointLight.linear = 0.09f;
     pointLight.quadratic = 0.032f;
+
+    float carpetVertices[] = {
+            // positions            // normals         // texcoords
+            5.0f, -0.48f,  5.0f,  0.0f, 1.0f, 0.0f,  2.0f,  0.0f,
+            -5.0f, -0.48f,  5.0f,  0.0f, 1.0f, 0.0f,   0.0f,  0.0f,
+            -5.0f, -0.48f, -5.0f,  0.0f, 1.0f, 0.0f,   0.0f, 2.0f,
+
+            5.0f, -0.48f,  5.0f,  0.0f, 1.0f, 0.0f,  2.0f,  0.0f,
+            -5.0f, -0.48f, -5.0f,  0.0f, 1.0f, 0.0f,   0.0f, 2.0f,
+            5.0f, -0.48f, -5.0f,  0.0f, 1.0f, 0.0f,  2.0f, 2.0f
+    };
+    // carpet VAO
+    unsigned int carpetVAO, carpetVBO;
+    glGenVertexArrays(1, &carpetVAO);
+    glGenBuffers(1, &carpetVBO);
+    glBindVertexArray(carpetVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, carpetVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(carpetVertices), carpetVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glBindVertexArray(0);
 
 
 
@@ -261,9 +286,12 @@ int main() {
     // load textures
     // -------------
     unsigned int floorTexture = loadTexture(FileSystem::getPath("resources/textures/wood2.jpg").c_str(), true);
-
     podShader.use();
     podShader.setInt("texture1", 0);
+
+    unsigned int carpetTexture = loadTexture(FileSystem::getPath("resources/textures/tepih.jpg").c_str(), true);
+    carpetShader.use();
+    carpetShader.setInt("texture1", 0);
 
 
     // ----- FRAMEBUFFER (HDR -----
@@ -331,13 +359,27 @@ int main() {
         podShader.setVec3("viewPos", programState->camera.Position);
         podShader.setVec3("lightPos", pointLight.position);
         podShader.setInt("blinn", blinn);
-        podShader.setFloat("material.shininess", 32.0f);
+        podShader.setFloat("material.shininess", 64.0f);
 
         //crtanje poda
         glDisable(GL_CULL_FACE);
         glBindVertexArray(planeVAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, floorTexture);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glEnable(GL_CULL_FACE);
+
+
+        //carpet
+        carpetShader.setVec3("viewPos", programState->camera.Position);
+        carpetShader.setVec3("lightPos", pointLight.position);
+        carpetShader.setInt("blinn", blinn);
+        carpetShader.setFloat("material.shininess", 6144.0f);
+
+        glDisable(GL_CULL_FACE);
+        glBindVertexArray(carpetVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, carpetTexture);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glEnable(GL_CULL_FACE);
 
@@ -469,12 +511,12 @@ void processInput(GLFWwindow *window) {
     {
         blinn = !blinn;
         blinnKeyPressed = true;
-        std::cout << (blinn ? "Blinn-Phong" : "Phong") << std::endl;
+//        std::cout << (blinn ? "Blinn-Phong" : "Phong") << std::endl;
     }
     if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE)
     {
         blinnKeyPressed = false;
-        std::cout << (blinn ? "Blinn-Phong" : "Phong") << std::endl;
+//        std::cout << (blinn ? "Blinn-Phong" : "Phong") << std::endl;
     }
 
     //needed for colorScheme adjustments
@@ -625,8 +667,8 @@ unsigned int loadTexture(char const * path, bool gammaCorrection)
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
