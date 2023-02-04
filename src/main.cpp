@@ -182,11 +182,11 @@ int main() {
     // build and compile shaders
     // -------------------------
     Shader ourShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
+    Shader deskShader("resources/shaders/desk.vs", "resources/shaders/desk.fs");
     Shader podShader("resources/shaders/pod.vs", "resources/shaders/pod.fs");
     Shader screenShader( "resources/shaders/screen.vs", "resources/shaders/screen.fs");
     Shader carpetShader("resources/shaders/carpet.vs", "resources/shaders/carpet.fs");
-
-//    Shader kockaShader("resources/shaders/kocka.vs", "resources/shaders/kocka.fs");
+    Shader cubeShader("resources/shaders/kocka.vs", "resources/shaders/kocka.fs");
 
     // load models
     // -----------
@@ -194,6 +194,7 @@ int main() {
     Model deskModel("resources/objects/desk/desk.obj");
     Model chairModel("resources/objects/chair/chair.obj");
     Model computerModel("resources/objects/computer/Notebook.obj");
+    Model clockModel("resources/objects/clock/clock.obj");
     ourModel.SetShaderTextureNamePrefix("material.");
 
     PointLight& pointLight = programState->pointLight;
@@ -232,7 +233,6 @@ int main() {
     glBindVertexArray(0);
 
 
-
     float planeVertices[] = {
             // positions            // normals         // texcoords
             10.0f, -0.5f,  10.0f,  0.0f, 1.0f, 0.0f,  10.0f,  0.0f,
@@ -259,8 +259,63 @@ int main() {
     glBindVertexArray(0);
 
 
+    float cubeVertices[] = {
+            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+            0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    };
 
 
+    //cube VAO
+    unsigned int cubeVAO, cubeVBO;
+    glGenVertexArrays(1, &cubeVAO);
+    glGenBuffers(1, &cubeVBO);
+    glBindVertexArray(cubeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glBindVertexArray(0);
 
 
     //teksture i to
@@ -277,6 +332,13 @@ int main() {
     carpetShader.use();
     carpetShader.setInt("texture1", 0);
 
+    unsigned int deskTexture = loadTexture(FileSystem::getPath("resources/textures/desk.png").c_str(), true);
+    deskShader.use();
+    deskShader.setInt("texture1", 0);
+
+    unsigned int cubeTexture = loadTexture(FileSystem::getPath("resources/textures/awesomeface.png").c_str(), true);
+    cubeShader.use();
+    cubeShader.setInt("texture1", 0);
 
     // ----- FRAMEBUFFER (HDR -----
     unsigned int hdrFBO;
@@ -329,7 +391,7 @@ int main() {
 
         glClearColor(programState->clearColor.r, programState->clearColor.g, programState->clearColor.b, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        ////////
 
         podShader.use();
 
@@ -338,8 +400,8 @@ int main() {
         podShader.setMat4("projection", projection);
         podShader.setMat4("view", view);
 
-        //osvetljenje za pod
         pointLight.position = glm::vec3(4.0 * cos(glfwGetTime()) , 4.0f, 4.0*sin(glfwGetTime()));
+        //osvetljenje za pod
         podShader.setVec3("viewPos", programState->camera.Position);
         podShader.setVec3("lightPos", pointLight.position);
         podShader.setInt("blinn", blinn);
@@ -353,12 +415,15 @@ int main() {
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glEnable(GL_CULL_FACE);
 
-
         //carpet
+        carpetShader.use();
+        carpetShader.setMat4("projection", projection);
+        carpetShader.setMat4("view", view);
+
         carpetShader.setVec3("viewPos", programState->camera.Position);
         carpetShader.setVec3("lightPos", pointLight.position);
         carpetShader.setInt("blinn", blinn);
-        carpetShader.setVec3("pointLight.specular", glm::vec3(0.0f, 0.0f, 0.0f));//non shining not working?
+        carpetShader.setVec3("material.specular", glm::vec3(0.0f, 0.0f, 0.0f));//non shining not working?
         carpetShader.setFloat("material.shininess", 6144.0f);
 
         glDisable(GL_CULL_FACE);
@@ -367,6 +432,37 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, carpetTexture);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glEnable(GL_CULL_FACE);
+
+
+        //cube
+//        cubeShader.use();
+//        cubeShader.setMat4("projection", projection);
+//        cubeShader.setMat4("view", view);
+//
+//        cubeShader.setVec3("viewPos", programState->camera.Position);
+//        cubeShader.setVec3("lightPos", pointLight.position);
+//        cubeShader.setInt("blinn", blinn);
+//        cubeShader.setVec3("pointLight.specular", glm::vec3(0.0f, 0.0f, 0.0f));//non shining not working?
+//        cubeShader.setFloat("material.shininess", 32.0f);
+
+
+        cubeShader.use();
+        view = programState->camera.GetViewMatrix();
+        projection = glm::perspective(glm::radians(programState->camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        cubeShader.setMat4("view", view);
+        cubeShader.setMat4("projection", projection);
+
+        glDisable(GL_CULL_FACE);
+        glBindVertexArray(cubeVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, cubeTexture);
+        glm::mat4 model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+        model = glm::scale(model, glm::vec3(10.f));
+        model = glm::translate(model, glm::vec3(0.0f, -5.0f, 7.0f));
+        cubeShader.setMat4("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glEnable(GL_CULL_FACE);
+
 
 
         // osvetljenje modela
@@ -390,26 +486,44 @@ int main() {
         ourShader.setMat4("view", view);
 
         // render the loaded model
-        glm::mat4 model = glm::mat4(1.0f);
-//        model = glm::translate(model,
-//                               programState->backpackPosition); // translate it down, so it's at the center of the scene
-//        model = glm::scale(model, glm::vec3(programState->backpackScale));    // it's a bit too big for our scene, so scale it down
-//        ourShader.setMat4("model", model);
-//        ourModel.Draw(ourShader);
+        model = glm::mat4(1.0f);
+
 
             //chair
         model = glm::translate(model,
-                               programState->backpackPosition+glm::vec3(1.0f, -0.5f, 1.0f)); // translate it down, so it's at the center of the scene
+                               programState->backpackPosition+glm::vec3(0.5f, -0.5f, 0.0f)); // translate it down, so it's at the center of the scene
         model = glm::scale(model, glm::vec3(programState->backpackScale*0.08));    // it's a bit too big for our scene, so scale it down
         ourShader.setMat4("model", model);
         chairModel.Draw(podShader);
 
             //table
+        deskShader.use();
+//        pointLight.position = glm::vec3(4.0 * cos(glfwGetTime()) , 4.0f, 4.0*sin(glfwGetTime()));
+        deskShader.setVec3("pointLight.position", pointLight.position);
+        deskShader.setVec3("pointLight.ambient", pointLight.ambient);
+        deskShader.setVec3("pointLight.diffuse", pointLight.diffuse);
+        deskShader.setVec3("pointLight.specular", pointLight.specular);
+        deskShader.setFloat("pointLight.constant", pointLight.constant);
+        deskShader.setFloat("pointLight.linear", pointLight.linear);
+        deskShader.setFloat("pointLight.quadratic", pointLight.quadratic);
+        deskShader.setVec3("viewPosition", programState->camera.Position);
+        deskShader.setFloat("material.shininess", 16.0f);
+        deskShader.setInt("blinn", blinn); //blinn toggle
+//         view/projection transformations
+        projection = glm::perspective(glm::radians(programState->camera.Zoom),
+                                      (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
+        view = programState->camera.GetViewMatrix();
+        deskShader.setMat4("projection", projection);
+        deskShader.setMat4("view", view);
+
         model = glm::translate(model,
                                programState->backpackPosition+glm::vec3(2.0f, 0.0f, 2.0f)); // translate it down, so it's at the center of the scene
         model = glm::scale(model, glm::vec3(programState->backpackScale*6.0));    // it's a bit too big for our scene, so scale it down
-        ourShader.setMat4("model", model);
-        deskModel.Draw(ourShader);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, deskTexture);
+        deskShader.setMat4("model", model);
+        deskModel.Draw(deskShader);
 
             //laptop
         model = glm::translate(model,
@@ -418,6 +532,14 @@ int main() {
         model = glm::rotate(model, glm::radians(-120.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         ourShader.setMat4("model", model);
         computerModel.Draw(ourShader);
+
+        //clock
+//        model = glm::translate(model,
+//                               glm::vec3(2.0f, 4.0f, 0.0f)); // translate it down, so it's at the center of the scene
+//        model = glm::scale(model, glm::vec3(programState->backpackScale*1.2));    // it's a bit too big for our scene, so scale it down
+//        model = glm::rotate(model, glm::radians(-120.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+//        ourShader.setMat4("model", model);
+//        clockModel.Draw(ourShader);
 
 
         //imgui
