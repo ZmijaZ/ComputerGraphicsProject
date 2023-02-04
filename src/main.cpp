@@ -336,7 +336,7 @@ int main() {
     deskShader.use();
     deskShader.setInt("texture1", 0);
 
-    unsigned int cubeTexture = loadTexture(FileSystem::getPath("resources/textures/awesomeface.png").c_str(), true);
+    unsigned int cubeTexture = loadTexture(FileSystem::getPath("resources/textures/sticker.jpg").c_str(), true);
     cubeShader.use();
     cubeShader.setInt("texture1", 0);
 
@@ -580,7 +580,7 @@ int main() {
 
     glDeleteVertexArrays(1, &cubeVAO);
     glDeleteBuffers(1, &cubeVBO);
-    
+
 
     glfwTerminate();
     return 0;
