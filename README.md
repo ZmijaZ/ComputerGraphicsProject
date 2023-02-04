@@ -7,3 +7,7 @@ UPARROW, DOWNARROW pomera kameru (gore, dole)
 B iskljucuje/ukljucuje blinn-phong
 Q menja color scheme (invertovane boje, gray scale, obicno)
 SPACE ukljucuje/iskljucuje HDR
+
+
+link do snimka 
+https://drive.google.com/drive/u/0/folders/10LdqyEZWQ5Pg-eHZoC660_V3Eutqttro
