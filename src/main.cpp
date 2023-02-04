@@ -571,6 +571,17 @@ int main() {
     ImGui::DestroyContext();
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
+
+    glDeleteVertexArrays(1, &planeVAO);
+    glDeleteBuffers(1, &planeVBO);
+
+    glDeleteVertexArrays(1, &carpetVAO);
+    glDeleteBuffers(1, &carpetVBO);
+
+    glDeleteVertexArrays(1, &cubeVAO);
+    glDeleteBuffers(1, &cubeVBO);
+    
+
     glfwTerminate();
     return 0;
 }
