@@ -7,14 +7,21 @@ in VS_OUT {
     vec2 TexCoords;
 } fs_in;
 
-uniform sampler2D floorTexture;
+struct Material {
+    sampler2D floorTexture;
+    float shininess;
+};
+
+// uniform sampler2D floorTexture;
 uniform vec3 lightPos;
 uniform vec3 viewPos;
 uniform bool blinn;
 
+uniform Material material;
+
 void main()
 {
-    vec3 color = texture(floorTexture, fs_in.TexCoords).rgb;
+    vec3 color = texture(material.floorTexture, fs_in.TexCoords).rgb;
     // ambient
     vec3 ambient = 0.05 * color;
     // diffuse
@@ -29,7 +36,7 @@ void main()
     if(blinn)
     {
         vec3 halfwayDir = normalize(lightDir + viewDir);
-        spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
+        spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
     }
     else
     {

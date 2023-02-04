@@ -194,9 +194,9 @@ int main() {
     ourModel.SetShaderTextureNamePrefix("material.");
 
     PointLight& pointLight = programState->pointLight;
-    pointLight.position = glm::vec3(4.0f, 4.0, 0.0);
+    pointLight.position = glm::vec3(4.0f, 8.0, 0.0);
     pointLight.ambient = glm::vec3(0.1, 0.1, 0.1);
-    pointLight.diffuse = glm::vec3(0.6, 0.6, 0.6);
+    pointLight.diffuse = glm::vec3(0.6, 0.8, 0.6);
     pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
 
     pointLight.constant = 1.0f;
@@ -260,7 +260,7 @@ int main() {
 
     // load textures
     // -------------
-    unsigned int floorTexture = loadTexture(FileSystem::getPath("resources/textures/wood.png").c_str(), true);
+    unsigned int floorTexture = loadTexture(FileSystem::getPath("resources/textures/wood2.jpg").c_str(), true);
 
     podShader.use();
     podShader.setInt("texture1", 0);
@@ -272,13 +272,13 @@ int main() {
     glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
 
     // create a color attachment texture
-    unsigned int textureColorbuffer;
-    glGenTextures(1, &textureColorbuffer);
-    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+    unsigned int textureColorBuffer;
+    glGenTextures(1, &textureColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorBuffer, 0);
     // create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
     unsigned int rbo;
     glGenRenderbuffers(1, &rbo);
@@ -331,6 +331,7 @@ int main() {
         podShader.setVec3("viewPos", programState->camera.Position);
         podShader.setVec3("lightPos", pointLight.position);
         podShader.setInt("blinn", blinn);
+        podShader.setFloat("material.shininess", 32.0f);
 
         //crtanje poda
         glDisable(GL_CULL_FACE);
@@ -340,8 +341,8 @@ int main() {
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glEnable(GL_CULL_FACE);
 
+
         // osvetljenje modela
-        // don't forget to enable shader before setting uniforms
         ourShader.use();
 //        pointLight.position = glm::vec3(4.0 * cos(glfwGetTime()) , 4.0f, 4.0*sin(glfwGetTime()));
         ourShader.setVec3("pointLight.position", pointLight.position);
@@ -352,7 +353,8 @@ int main() {
         ourShader.setFloat("pointLight.linear", pointLight.linear);
         ourShader.setFloat("pointLight.quadratic", pointLight.quadratic);
         ourShader.setVec3("viewPosition", programState->camera.Position);
-        ourShader.setFloat("material.shininess", 32.0f);
+        ourShader.setFloat("material.shininess", 16.0f);
+        ourShader.setInt("blinn", blinn); //blinn toggle
 //         view/projection transformations
         projection = glm::perspective(glm::radians(programState->camera.Zoom),
                                                 (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
@@ -397,14 +399,12 @@ int main() {
 
 
         //framebuffer (nastavak)
-
-
         // now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         screenShader.use();
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+        glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
 
         glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
         // clear all relevant buffers
@@ -422,7 +422,7 @@ int main() {
         screenShader.use();
         screenShader.setInt("colorScheme", colorScheme);
         glBindVertexArray(quadVAO);
-        glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
+        glBindTexture(GL_TEXTURE_2D, textureColorBuffer);	// use the color attachment texture as the texture of the quad plane
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
@@ -469,12 +469,12 @@ void processInput(GLFWwindow *window) {
     {
         blinn = !blinn;
         blinnKeyPressed = true;
-//        std::cout << (blinn ? "Blinn-Phong" : "Phong") << std::endl;
+        std::cout << (blinn ? "Blinn-Phong" : "Phong") << std::endl;
     }
     if (glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE)
     {
         blinnKeyPressed = false;
-//        std::cout << (blinn ? "Blinn-Phong" : "Phong") << std::endl;
+        std::cout << (blinn ? "Blinn-Phong" : "Phong") << std::endl;
     }
 
     //needed for colorScheme adjustments
